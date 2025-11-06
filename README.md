@@ -33,4 +33,13 @@ ros2 run teleop_twist_keyboard teleop_twist_keyboard
 ```
 
 ## Setup the docker container on Spot CORE I/O
-sudo docker build -t spot_coreIO_ros2 --platform linux/arm64 -f Dockerfile.l4t .
+### From local machine
+```
+docker build -t spot_coreio_ros2 --platform linux/arm64 -f Dockerfile.l4t .
+docker save spot_coreio_ros2:latest | pigz > spot_coreio_ros2.tgz
+scp -r -P 20022 spot_coreio_ros2.tgz spot@192.168.80.3:/home/spot/
+```
+### From CORE I/O
+```
+sudo docker load -i spot_coreio_ros2.tgz
+```

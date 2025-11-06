@@ -71,13 +71,19 @@ class SpotROS2Driver(Node):
         password = self.get_parameter("password").get_parameter_value().string_value
 
         # load the user-defined odometry frame
-        self.declare_parameter("odometry_frame", "odom")
-        self.odom_frame = self.get_parameter("odometry_frame").get_parameter_value().string_value
-        if self.odom_frame not in [ODOM_FRAME_NAME, VISION_FRAME_NAME]:
-            self.get_logger().error(f'Invalid odometry frame: {self.odom_frame}. Using default "odom".')
+        self.declare_parameter("odometry_frame", "kinematic")
+        # to avoid the naming confusion:
+        # ODOM_FRAME_NAME -> spot odometry using kinematic -> /odom_kinematic
+        # VISION_FRAME_NAME -> spot odometry using kinematic -> /odom_vision
+        self.odom_choice = self.get_parameter("odometry_frame").get_parameter_value().string_value
+        if self.odom_choice = "kinematic":
             self.odom_frame = ODOM_FRAME_NAME
+        elif self.odom_choice = "vision":
+            self.odom_frame = VISION_FRAME_NAME
         else:
-            self.get_logger().info(f"Using odometry frame: {self.odom_frame}")
+            self.get_logger().error(f'Invalid odometry frame: {self.odom_choice}. Using default "kinematic".')
+            self.odom_choice = "kinematic"
+            self.odom_frame = ODOM_FRAME_NAME
 
         # if the user has a streaming client license, use it to get IMU data at 333Hz
         self.declare_parameter("use_streaming_client", False)
@@ -226,7 +232,7 @@ class SpotROS2Driver(Node):
 
         tform_odom_fiducial = get_a_tform_b(fiducials[0].transforms_snapshot, self.odom_frame, "filtered_fiducial_200")
         tform_fiducial_odom = tform_odom_fiducial.inverse()
-        self.publish_static_transform(tform_fiducial_odom, request.fiducial_name, f"odom_{self.odom_frame}")
+        self.publish_static_transform(tform_fiducial_odom, request.fiducial_name, f"odom_{self.odom_choice}")
 
         response.success = True
         response.message = "Transform successfully calculated."
@@ -318,18 +324,21 @@ class SpotROS2Driver(Node):
 
     def publish_robot_state(self):
         """Periodic publish robot data (if connected)."""
-        # publish odom TF
-        robot_state: RobotState = self.robot_state_client.get_robot_state()
-        odom_tfrom_body = get_a_tform_b(
-            robot_state.kinematic_state.transforms_snapshot, self.odom_frame, BODY_FRAME_NAME
-        )
-        self.publish_transform(odom_tfrom_body, f"odom_{self.odom_frame}", "base_link")
+        # detect and publish fiducial
+        fiducials = self.world_object_client.list_world_objects([world_object_pb2.WORLD_OBJECT_APRILTAG]).world_objects
+        if fiducials:
+            fiducial = fiducials[0]
+            tform_fiducial_odom = get_a_tform_b(self.odom_frame, fiducial.transforms_snapshot, "filtered_fiducial_200")
+            self.publish_static_transform( tform_fiducial_odom, request.fiducial_name, f"odom_{self.odom_choice}")
 
-        # publish odom topic
+        # publish odom
+        robot_state: RobotState = self.robot_state_client.get_robot_state()
+        odom_tfrom_body = get_a_tform_b(robot_state.kinematic_state.transforms_snapshot, self.odom_frame, BODY_FRAME_NAME)
         odom_vel_of_body = robot_state.kinematic_state.velocity_of_body_in_odom
+        self.publish_transform(odom_tfrom_body, f"odom_{self.odom_frame}", "base_link")
         self.publish_odometry(odom_tfrom_body, odom_vel_of_body, f"odom_{self.odom_frame}", "base_link")
 
-        # publish camera TF
+        # publish camera images
         request = build_image_request(
             "frontleft_fisheye_image",
             pixel_format=image_pb2.Image.PIXEL_FORMAT_GREYSCALE_U8,
