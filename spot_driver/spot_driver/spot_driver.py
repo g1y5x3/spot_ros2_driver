@@ -328,15 +328,15 @@ class SpotROS2Driver(Node):
         fiducials = self.world_object_client.list_world_objects([world_object_pb2.WORLD_OBJECT_APRILTAG]).world_objects
         if fiducials:
             fiducial = fiducials[0]
-            tform_fiducial_odom = get_a_tform_b(self.odom_frame, fiducial.transforms_snapshot, "filtered_fiducial_200")
-            self.publish_static_transform( tform_fiducial_odom, request.fiducial_name, f"odom_{self.odom_choice}")
+            tform_fiducial_odom = get_a_tform_b(fiducial.transforms_snapshot, "filtered_fiducial_200", self.odom_frame)
+            self.publish_static_transform( tform_fiducial_odom, "filtered_fiducial_200", f"odom_{self.odom_choice}")
 
         # publish odom
         robot_state: RobotState = self.robot_state_client.get_robot_state()
         odom_tfrom_body = get_a_tform_b(robot_state.kinematic_state.transforms_snapshot, self.odom_frame, BODY_FRAME_NAME)
         odom_vel_of_body = robot_state.kinematic_state.velocity_of_body_in_odom
-        self.publish_transform(odom_tfrom_body, f"odom_{self.odom_frame}", "base_link")
-        self.publish_odometry(odom_tfrom_body, odom_vel_of_body, f"odom_{self.odom_frame}", "base_link")
+        self.publish_transform(odom_tfrom_body, f"odom_{self.odom_choice}", "base_link")
+        self.publish_odometry(odom_tfrom_body, odom_vel_of_body, f"odom_{self.odom_choice}", "base_link")
 
         # publish camera images
         request = build_image_request(

@@ -24,7 +24,7 @@ def generate_launch_description():
     )
 
     declare_odomframe_arg = DeclareLaunchArgument(
-        "odometry_frame", default_value="odom", description="Odometry frame to use (odom or vision)"
+        "odometry_frame", default_value="kinematic", description="Odometry frame to use (kinematic or vision)"
     )
 
     declare_streaming_client_arg = DeclareLaunchArgument(

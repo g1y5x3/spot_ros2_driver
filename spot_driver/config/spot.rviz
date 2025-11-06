@@ -5,6 +5,8 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
+        - /TF1/Frames1
+        - /TF1/Tree1
         - /Odometry1/Shape1
         - /Odometry1/Covariance1
       Splitter Ratio: 0.5
@@ -55,7 +57,11 @@ Visualization Manager:
         All Enabled: true
         base_link:
           Value: true
-        odom_odom:
+        filtered_fiducial_200:
+          Value: true
+        frontleft_fisheye:
+          Value: true
+        odom_kinematic:
           Value: true
       Marker Scale: 1
       Name: TF
@@ -63,8 +69,11 @@ Visualization Manager:
       Show Axes: true
       Show Names: true
       Tree:
-        odom_odom:
-          base_link:
+        base_link:
+          frontleft_fisheye:
+            {}
+        filtered_fiducial_200:
+          odom_kinematic:
             {}
       Update Interval: 0
       Value: true
@@ -152,26 +161,21 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Class: rviz_default_plugins/Orbit
-      Distance: 18.67544174194336
+      Angle: -1.5700000524520874
+      Class: rviz_default_plugins/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
-      Focal Point:
-        X: 0
-        Y: 0
-        Z: 0
-      Focal Shape Fixed Size: true
-      Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.6553970575332642
+      Scale: 182.72348022460938
       Target Frame: <Fixed Frame>
-      Value: Orbit (rviz)
-      Yaw: 0.5622199177742004
+      Value: TopDownOrtho (rviz_default_plugins)
+      X: 0
+      Y: 0
     Saved: ~
 Window Geometry:
   Displays:
@@ -190,4 +194,4 @@ Window Geometry:
     collapsed: false
   Width: 1920
   X: 0
-  Y: 25
+  Y: 12
