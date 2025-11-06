@@ -76,9 +76,9 @@ class SpotROS2Driver(Node):
         # ODOM_FRAME_NAME -> spot odometry using kinematic -> /odom_kinematic
         # VISION_FRAME_NAME -> spot odometry using kinematic -> /odom_vision
         self.odom_choice = self.get_parameter("odometry_frame").get_parameter_value().string_value
-        if self.odom_choice = "kinematic":
+        if self.odom_choice == "kinematic":
             self.odom_frame = ODOM_FRAME_NAME
-        elif self.odom_choice = "vision":
+        elif self.odom_choice == "vision":
             self.odom_frame = VISION_FRAME_NAME
         else:
             self.get_logger().error(f'Invalid odometry frame: {self.odom_choice}. Using default "kinematic".')
